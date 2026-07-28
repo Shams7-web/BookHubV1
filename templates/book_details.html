@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <a href="{{ url_for('books') }}" class="btn btn-outline-secondary mb-4">&larr; Back to Books</a>
+
+    <div class="row g-5">
+        <div class="col-md-4">
+            <img src="{{ book.image_url }}" class="img-fluid rounded shadow-sm" alt="{{ book.title }}">
+        </div>
+        <div class="col-md-8">
+            <h1>{{ book.title }}</h1>
+            <p class="text-muted fs-5">by {{ book.author }}</p>
+            <span class="badge bg-secondary mb-3">{{ book.category }}</span>
+
+            <h3 class="text-primary">${{ "%.2f"|format(book.price) }}</h3>
+
+            <ul class="list-unstyled">
+                <li><strong>Stock:</strong> {{ book.stock }} available</li>
+                <li><strong>Published Year:</strong> {{ book.published_year }}</li>
+            </ul>
+
+            <h5 class="mt-4">Description</h5>
+            <p>{{ book.description }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.hero {
+    min-height: 70vh;
+    background: linear-gradient(135deg, #0d6efd, #084298);
+}
+
+.card-img-top {
+    height: 280px;
+    object-fit: cover;
+}

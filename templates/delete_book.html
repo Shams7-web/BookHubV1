@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Delete Book{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Delete Book</h1>
+
+    <div class="alert alert-warning">
+        Are you sure you want to delete <strong>"{{ book.title }}"</strong> by {{ book.author }}? This action cannot be undone.
+    </div>
+
+    <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
+        <button type="submit" name="confirm" value="yes" class="btn btn-danger">Yes, Delete</button>
+        <button type="submit" name="confirm" value="no" class="btn btn-outline-secondary">Cancel</button>
+    </form>
+</div>
+{% endblock %}
