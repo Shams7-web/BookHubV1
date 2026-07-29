@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Admin Login{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 420px;">
+    <h1 class="mb-4 text-center">Admin Login</h1>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="row g-3">
+        <div class="col-12">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+        </div>
+
+        <div class="col-12">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">Log In</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

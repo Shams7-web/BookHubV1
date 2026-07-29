@@ -1,11 +1,80 @@
-from flask import Flask, render_template, request, redirect, url_for
-from models import db, Book
+import os
+import uuid
+from functools import wraps
+
+from flask import Flask, render_template, request, redirect, session, url_for
+from werkzeug.utils import secure_filename
+from models import Admin, db, Book
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///bookhub.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB max upload size
+
+DEFAULT_ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+DEFAULT_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png"}
+ALLOWED_IMAGE_MIMETYPES = {"image/jpeg", "image/png"}
+UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db.init_app(app)
+
+
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if not session.get("admin_id"):
+            return redirect(url_for("admin_login", next=request.path))
+        return view_func(*args, **kwargs)
+    return wrapped_view
+
+
+def allowed_image_file(file_storage):
+    filename = file_storage.filename or ""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    return ext in ALLOWED_IMAGE_EXTENSIONS and file_storage.mimetype in ALLOWED_IMAGE_MIMETYPES
+
+
+def save_uploaded_image(file_storage):
+    original_name = secure_filename(file_storage.filename)
+    ext = original_name.rsplit(".", 1)[-1].lower()
+    stored_filename = f"{uuid.uuid4().hex}.{ext}"
+    file_storage.save(os.path.join(UPLOAD_FOLDER, stored_filename))
+    return stored_filename
+
+
+def delete_uploaded_image(filename):
+    if not filename or filename.startswith(("http://", "https://")):
+        return
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
+
+@app.template_global()
+def cover_image_url(image_url):
+    if not image_url:
+        return url_for("static", filename="img/placeholder.svg")
+    if image_url.startswith(("http://", "https://")):
+        return image_url
+    return url_for("static", filename=f"uploads/{image_url}")
+
+
+def seed_admin():
+    if Admin.query.count() > 0:
+        return
+
+    default_admin = Admin(username=DEFAULT_ADMIN_USERNAME)
+    default_admin.set_password(DEFAULT_ADMIN_PASSWORD)
+    db.session.add(default_admin)
+    db.session.commit()
+    print(
+        f"Created default admin account -> username: '{DEFAULT_ADMIN_USERNAME}', "
+        f"password: '{DEFAULT_ADMIN_PASSWORD}'. Please log in and change this password."
+    )
 
 
 def seed_books():
@@ -52,6 +121,7 @@ def seed_books():
 with app.app_context():
     db.create_all()
     seed_books()
+    seed_admin()
 
 
 @app.route("/")
@@ -95,13 +165,49 @@ def book_details(book_id):
     return render_template("book_details.html", book=book)
 
 
+def _safe_next_path(path):
+    if path and path.startswith("/") and not path.startswith("//"):
+        return path
+    return None
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if session.get("admin_id"):
+        return redirect(url_for("admin"))
+
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        admin_user = Admin.query.filter_by(username=username).first()
+        if admin_user and admin_user.check_password(password):
+            session.clear()
+            session["admin_id"] = admin_user.id
+            next_url = _safe_next_path(request.args.get("next"))
+            return redirect(next_url or url_for("admin"))
+
+        error = "Invalid username or password."
+
+    return render_template("admin_login.html", error=error)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_id", None)
+    return redirect(url_for("admin_login"))
+
+
 @app.route("/admin")
+@login_required
 def admin():
     all_books = Book.query.all()
     return render_template("admin.html", books=all_books)
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
+@login_required
 def add_book():
     if request.method == "POST":
         title = request.form.get("title", "").strip()
@@ -109,7 +215,7 @@ def add_book():
         category = request.form.get("category", "").strip()
         price = request.form.get("price", "").strip()
         description = request.form.get("description", "").strip()
-        image_url = request.form.get("image_url", "").strip()
+        cover_image = request.files.get("cover_image")
 
         errors = []
         if not title:
@@ -129,6 +235,13 @@ def add_book():
                     errors.append("Price must be a positive number.")
             except ValueError:
                 errors.append("Price must be a valid number.")
+
+        image_url = None
+        if cover_image and cover_image.filename:
+            if allowed_image_file(cover_image):
+                image_url = save_uploaded_image(cover_image)
+            else:
+                errors.append("Cover image must be a JPG, JPEG, or PNG file.")
 
         if errors:
             return render_template("add_book.html", errors=errors, form=request.form)
@@ -149,6 +262,7 @@ def add_book():
 
 
 @app.route("/admin/edit/<int:book_id>", methods=["GET", "POST"])
+@login_required
 def edit_book(book_id):
     book = Book.query.get_or_404(book_id)
 
@@ -158,7 +272,7 @@ def edit_book(book_id):
         category = request.form.get("category", "").strip()
         price = request.form.get("price", "").strip()
         description = request.form.get("description", "").strip()
-        image_url = request.form.get("image_url", "").strip()
+        cover_image = request.files.get("cover_image")
 
         errors = []
         if not title:
@@ -179,15 +293,25 @@ def edit_book(book_id):
             except ValueError:
                 errors.append("Price must be a valid number.")
 
+        new_image_url = book.image_url
+        if cover_image and cover_image.filename:
+            if allowed_image_file(cover_image):
+                new_image_url = save_uploaded_image(cover_image)
+            else:
+                errors.append("Cover image must be a JPG, JPEG, or PNG file.")
+
         if errors:
             return render_template("edit_book.html", errors=errors, book=book, form=request.form)
+
+        if new_image_url != book.image_url:
+            delete_uploaded_image(book.image_url)
 
         book.title = title
         book.author = author
         book.category = category
         book.price = price_value
         book.description = description
-        book.image_url = image_url
+        book.image_url = new_image_url
         db.session.commit()
         return redirect(url_for("admin"))
 
@@ -195,11 +319,13 @@ def edit_book(book_id):
 
 
 @app.route("/admin/delete/<int:book_id>", methods=["GET", "POST"])
+@login_required
 def delete_book(book_id):
     book = Book.query.get_or_404(book_id)
 
     if request.method == "POST":
         if request.form.get("confirm") == "yes":
+            delete_uploaded_image(book.image_url)
             db.session.delete(book)
             db.session.commit()
         return redirect(url_for("admin"))

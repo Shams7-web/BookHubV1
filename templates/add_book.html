@@ -16,7 +16,7 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('add_book') }}" class="row g-3">
+    <form method="POST" action="{{ url_for('add_book') }}" enctype="multipart/form-data" class="row g-3">
         <div class="col-md-6">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title" value="{{ form.get('title', '') }}">
@@ -38,8 +38,8 @@
         </div>
 
         <div class="col-12">
-            <label for="image_url" class="form-label">Image URL</label>
-            <input type="text" class="form-control" id="image_url" name="image_url" value="{{ form.get('image_url', '') }}">
+            <label for="cover_image" class="form-label">Cover Image (JPG, JPEG, or PNG)</label>
+            <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
         </div>
 
         <div class="col-12">

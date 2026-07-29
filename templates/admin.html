@@ -14,6 +14,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>Cover</th>
                     <th>Title</th>
                     <th>Author</th>
                     <th>Category</th>
@@ -27,6 +28,7 @@
                 {% for book in books %}
                 <tr>
                     <td>{{ book.id }}</td>
+                    <td><img src="{{ cover_image_url(book.image_url) }}" alt="{{ book.title }}" style="width: 48px; height: 64px; object-fit: cover;" class="rounded"></td>
                     <td>{{ book.title }}</td>
                     <td>{{ book.author }}</td>
                     <td>{{ book.category }}</td>
