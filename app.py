@@ -1,10 +1,13 @@
 import os
+import re
 import uuid
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.utils import secure_filename
-from models import Admin, db, Book
+from models import Admin, ContactMessage, db, Book
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///bookhub.db"
@@ -170,6 +173,43 @@ def book_details(book_id):
     return render_template("book_details.html", book=book)
 
 
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "").strip()
+        email = request.form.get("email", "").strip()
+        subject = request.form.get("subject", "").strip()
+        message = request.form.get("message", "").strip()
+
+        errors = []
+        if not full_name:
+            errors.append("Full name is required.")
+        if not email:
+            errors.append("Email address is required.")
+        elif not EMAIL_PATTERN.match(email):
+            errors.append("Please enter a valid email address.")
+        if not subject:
+            errors.append("Subject is required.")
+        if not message:
+            errors.append("Message is required.")
+
+        if errors:
+            return render_template("contact.html", errors=errors, form=request.form, success=False)
+
+        new_message = ContactMessage(
+            full_name=full_name,
+            email=email,
+            subject=subject,
+            message=message,
+        )
+        db.session.add(new_message)
+        db.session.commit()
+        return redirect(url_for("contact", sent=1))
+
+    success = request.args.get("sent") == "1"
+    return render_template("contact.html", errors=None, form={}, success=success)
+
+
 def _safe_next_path(path):
     if path and path.startswith("/") and not path.startswith("//"):
         return path
@@ -208,7 +248,8 @@ def admin_logout():
 @login_required
 def admin():
     all_books = Book.query.all()
-    return render_template("admin.html", books=all_books)
+    unread_message_count = ContactMessage.query.filter_by(is_read=False).count()
+    return render_template("admin.html", books=all_books, unread_message_count=unread_message_count)
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
@@ -336,6 +377,47 @@ def delete_book(book_id):
         return redirect(url_for("admin"))
 
     return render_template("delete_book.html", book=book)
+
+
+@app.route("/admin/messages")
+@login_required
+def admin_messages():
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    return render_template("admin_messages.html", messages=messages)
+
+
+@app.route("/admin/messages/<int:message_id>")
+@login_required
+def message_details(message_id):
+    message = ContactMessage.query.get_or_404(message_id)
+    if not message.is_read:
+        message.is_read = True
+        db.session.commit()
+    return render_template("message_details.html", message=message)
+
+
+@app.route("/admin/messages/<int:message_id>/toggle-read", methods=["POST"])
+@login_required
+def toggle_message_read(message_id):
+    message = ContactMessage.query.get_or_404(message_id)
+    message.is_read = not message.is_read
+    db.session.commit()
+    next_url = _safe_next_path(request.form.get("next"))
+    return redirect(next_url or url_for("admin_messages"))
+
+
+@app.route("/admin/messages/<int:message_id>/delete", methods=["GET", "POST"])
+@login_required
+def delete_message(message_id):
+    message = ContactMessage.query.get_or_404(message_id)
+
+    if request.method == "POST":
+        if request.form.get("confirm") == "yes":
+            db.session.delete(message)
+            db.session.commit()
+        return redirect(url_for("admin_messages"))
+
+    return render_template("delete_message.html", message=message)
 
 
 if __name__ == "__main__":

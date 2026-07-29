@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Message from {{ message.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 800px;">
+    <a href="{{ url_for('admin_messages') }}" class="btn btn-outline-secondary mb-4">&larr; Back to Messages</a>
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <h1 class="mb-0">{{ message.subject }}</h1>
+        {% if message.is_read %}
+        <span class="badge bg-secondary">Read</span>
+        {% else %}
+        <span class="badge bg-danger">Unread</span>
+        {% endif %}
+    </div>
+
+    <ul class="list-unstyled mb-4">
+        <li><strong>From:</strong> {{ message.full_name }} &lt;{{ message.email }}&gt;</li>
+        <li><strong>Received:</strong> {{ message.created_at.strftime("%Y-%m-%d %H:%M") }}</li>
+    </ul>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="card-text" style="white-space: pre-wrap;">{{ message.message }}</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('toggle_message_read', message_id=message.id) }}" class="d-inline">
+        <input type="hidden" name="next" value="{{ url_for('admin_messages') }}">
+        <button type="submit" class="btn btn-outline-secondary">
+            Mark as {{ "Unread" if message.is_read else "Read" }}
+        </button>
+    </form>
+    <a href="{{ url_for('delete_message', message_id=message.id) }}" class="btn btn-outline-danger">Delete</a>
+</div>
+{% endblock %}

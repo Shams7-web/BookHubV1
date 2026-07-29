@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Delete Message{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Delete Message</h1>
+
+    <div class="alert alert-warning">
+        Are you sure you want to delete the message <strong>"{{ message.subject }}"</strong> from {{ message.full_name }}? This action cannot be undone.
+    </div>
+
+    <form method="POST" action="{{ url_for('delete_message', message_id=message.id) }}">
+        <button type="submit" name="confirm" value="yes" class="btn btn-danger">Yes, Delete</button>
+        <button type="submit" name="confirm" value="no" class="btn btn-outline-secondary">Cancel</button>
+    </form>
+</div>
+{% endblock %}
