@@ -129,10 +129,14 @@ def home():
     return render_template("index.html")
 
 
+BOOKS_PER_PAGE = 12
+
+
 @app.route("/books")
 def books():
     search = request.args.get("q", "").strip()
     category = request.args.get("category", "").strip()
+    page = request.args.get("page", 1, type=int)
 
     query = Book.query
 
@@ -145,14 +149,15 @@ def books():
     if category:
         query = query.filter(Book.category == category)
 
-    all_books = query.all()
+    pagination = query.order_by(Book.id).paginate(page=page, per_page=BOOKS_PER_PAGE, error_out=False)
     categories = [
         row[0] for row in db.session.query(Book.category).distinct().order_by(Book.category).all()
     ]
 
     return render_template(
         "books.html",
-        books=all_books,
+        books=pagination.items,
+        pagination=pagination,
         categories=categories,
         search=search,
         selected_category=category,
