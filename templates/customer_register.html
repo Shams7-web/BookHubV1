@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Register{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+    <h1 class="mb-4 text-center">Create an Account</h1>
+
+    {% if errors %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('customer_register') }}" class="row g-3">
+        <div class="col-md-6">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form.get('first_name', '') }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form.get('last_name', '') }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" value="{{ form.get('username', '') }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}">
+        </div>
+
+        <div class="col-12">
+            <label for="phone" class="form-label">Phone Number (optional)</label>
+            <input type="text" class="form-control" id="phone" name="phone" value="{{ form.get('phone', '') }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+
+        <div class="col-md-6">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+    </form>
+
+    <p class="text-center mt-3 mb-0">
+        Already have an account? <a href="{{ url_for('customer_login') }}">Log in</a>
+    </p>
+</div>
+{% endblock %}

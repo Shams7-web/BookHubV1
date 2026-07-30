@@ -35,9 +35,6 @@
                         <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('order_history') }}">My Orders</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link position-relative" href="{{ url_for('cart') }}">
                             Cart
                             {% if cart_item_count() %}
@@ -45,6 +42,32 @@
                             {% endif %}
                         </a>
                     </li>
+                    {% if session.get('customer_id') %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('wishlist') }}">
+                            Wishlist
+                            {% if wishlist_item_count() %}
+                            <span class="badge rounded-pill bg-danger">{{ wishlist_item_count() }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('order_history') }}">My Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('customer_account') }}">My Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('customer_logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('customer_register') }}">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('customer_login') }}">Login</a>
+                    </li>
+                    {% endif %}
                     {% if session.get('admin_id') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin') }}">Admin Dashboard</a>
@@ -64,6 +87,14 @@
 
     <!-- Page Content -->
     <main>
+        {% if request.args.get('cart_error') %}
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ request.args.get('cart_error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
 

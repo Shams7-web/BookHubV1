@@ -29,7 +29,7 @@
                     <td>${{ "%.2f"|format(item.book.price) }}</td>
                     <td style="max-width: 140px;">
                         <form method="POST" action="{{ url_for('update_cart_item', book_id=item.book.id) }}" class="d-flex gap-2">
-                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99" class="form-control form-control-sm">
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.book.stock }}" class="form-control form-control-sm">
                             <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
                         </form>
                     </td>

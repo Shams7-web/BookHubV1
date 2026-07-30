@@ -37,6 +37,16 @@
             <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', book.price) if form else book.price }}">
         </div>
 
+        <div class="col-md-6">
+            <label for="stock" class="form-label">Stock Quantity</label>
+            <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', book.stock) if form else book.stock }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
+            <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', book.low_stock_threshold) if form else book.low_stock_threshold }}">
+        </div>
+
         <div class="col-12">
             <label class="form-label d-block">Current Cover</label>
             <img src="{{ cover_image_url(book.image_url) }}" alt="{{ book.title }}" class="rounded mb-2" style="max-height: 150px;">

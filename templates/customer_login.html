@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Login{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 420px;">
+    <h1 class="mb-4 text-center">Login</h1>
+
+    {% if registered %}
+    <div class="alert alert-success">Registration successful! Please log in.</div>
+    {% endif %}
+
+    {% if login_reason == "checkout" %}
+    <div class="alert alert-info">Please log in or register to complete your purchase.</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="row g-3">
+        <div class="col-12">
+            <label for="identifier" class="form-label">Email or Username</label>
+            <input type="text" class="form-control" id="identifier" name="identifier" required autofocus>
+        </div>
+
+        <div class="col-12">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">Log In</button>
+        </div>
+    </form>
+
+    <p class="text-center mt-3 mb-0">
+        Don't have an account? <a href="{{ url_for('customer_register') }}">Register</a>
+    </p>
+</div>
+{% endblock %}

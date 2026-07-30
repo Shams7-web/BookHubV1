@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - My Account{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+    <h1 class="mb-4">My Account</h1>
+
+    {% if updated %}
+    <div class="alert alert-success">Your profile has been updated successfully.</div>
+    {% endif %}
+
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Name</strong>
+            <span>{{ customer.first_name }} {{ customer.last_name }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Username</strong>
+            <span>{{ customer.username }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Email</strong>
+            <span>{{ customer.email }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Phone</strong>
+            <span>{{ customer.phone or "Not provided" }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Account Created</strong>
+            <span>{{ customer.created_at.strftime("%Y-%m-%d") }}</span>
+        </li>
+    </ul>
+
+    <div class="mt-4">
+        <a href="{{ url_for('order_history') }}" class="btn btn-outline-primary">View Order History</a>
+        <a href="{{ url_for('customer_edit_profile') }}" class="btn btn-outline-secondary">Edit Profile</a>
+        <a href="{{ url_for('customer_change_password') }}" class="btn btn-outline-secondary">Change Password</a>
+    </div>
+</div>
+{% endblock %}

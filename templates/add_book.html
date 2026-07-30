@@ -37,6 +37,16 @@
             <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', '') }}">
         </div>
 
+        <div class="col-md-6">
+            <label for="stock" class="form-label">Stock Quantity</label>
+            <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', '0') }}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
+            <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', '5') }}">
+        </div>
+
         <div class="col-12">
             <label for="cover_image" class="form-label">Cover Image (JPG, JPEG, or PNG)</label>
             <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
