@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}BookHub - Checkout{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Checkout</h1>
+
+    {% if submitted %}
+    <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>Your checkout information has been saved successfully.</span>
+        <form method="POST" action="{{ url_for('place_order') }}" class="mb-0">
+            <button type="submit" class="btn btn-success">Place Order</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if errors %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="row g-5">
+        <div class="col-md-5 order-md-2">
+            <h4 class="mb-3">Order Summary</h4>
+            <ul class="list-group mb-3">
+                {% for item in cart_items %}
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">{{ item.book.title }}</h6>
+                        <small class="text-muted">Qty {{ item.quantity }} &times; ${{ "%.2f"|format(item.book.price) }}</small>
+                    </div>
+                    <span class="text-muted">${{ "%.2f"|format(item.subtotal) }}</span>
+                </li>
+                {% endfor %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Total</strong>
+                    <strong>${{ "%.2f"|format(cart_total) }}</strong>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-md-7 order-md-1">
+            <h4 class="mb-3">Customer Information</h4>
+            <form method="POST" action="{{ url_for('checkout') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ form.get('full_name', '') }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone" name="phone" value="{{ form.get('phone', '') }}">
+                </div>
+
+                <div class="col-12"><hr class="my-2"></div>
+
+                <h4 class="mb-3">Shipping Address</h4>
+
+                <div class="col-12">
+                    <label for="address_line1" class="form-label">Address Line 1</label>
+                    <input type="text" class="form-control" id="address_line1" name="address_line1" value="{{ form.get('address_line1', '') }}">
+                </div>
+
+                <div class="col-12">
+                    <label for="address_line2" class="form-label">Address Line 2 (optional)</label>
+                    <input type="text" class="form-control" id="address_line2" name="address_line2" value="{{ form.get('address_line2', '') }}">
+                </div>
+
+                <div class="col-md-5">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ form.get('city', '') }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="state" class="form-label">State / Province</label>
+                    <input type="text" class="form-control" id="state" name="state" value="{{ form.get('state', '') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="postal_code" class="form-label">Postal Code</label>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ form.get('postal_code', '') }}">
+                </div>
+
+                <div class="col-12">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ form.get('country', '') }}">
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Save Checkout Information</button>
+                    <a href="{{ url_for('cart') }}" class="btn btn-outline-secondary">Back to Cart</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

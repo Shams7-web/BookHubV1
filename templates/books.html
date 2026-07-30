@@ -35,7 +35,12 @@
                     <p class="card-text mb-1">by {{ book.author }}</p>
                     <span class="badge bg-secondary mb-2 align-self-start">{{ book.category }}</span>
                     <p class="card-text fw-bold">${{ "%.2f"|format(book.price) }}</p>
-                    <a href="{{ url_for('book_details', book_id=book.id) }}" class="btn btn-primary mt-auto">View Details</a>
+                    <a href="{{ url_for('book_details', book_id=book.id) }}" class="btn btn-primary mt-auto mb-2">View Details</a>
+                    <form method="POST" action="{{ url_for('add_to_cart', book_id=book.id) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="next" value="{{ request.full_path }}">
+                        <button type="submit" class="btn btn-outline-success w-100">Add to Cart</button>
+                    </form>
                 </div>
             </div>
         </div>

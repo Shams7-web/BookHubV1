@@ -34,6 +34,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('order_history') }}">My Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('cart') }}">
+                            Cart
+                            {% if cart_item_count() %}
+                            <span class="badge rounded-pill bg-danger">{{ cart_item_count() }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
                     {% if session.get('admin_id') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin') }}">Admin Dashboard</a>

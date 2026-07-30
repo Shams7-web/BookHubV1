@@ -7,6 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mb-0">Admin Dashboard</h1>
         <div>
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-primary me-2">Orders</a>
             <a href="{{ url_for('admin_messages') }}" class="btn btn-outline-primary position-relative me-2">
                 Messages
                 {% if unread_message_count %}

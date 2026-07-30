@@ -1,13 +1,22 @@
 import os
 import re
 import uuid
+from datetime import datetime
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, abort, render_template, request, redirect, session, url_for
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from werkzeug.utils import secure_filename
-from models import Admin, ContactMessage, db, Book
+from models import Admin, ContactMessage, db, Book, Order, OrderItem
+
+
+@event.listens_for(Engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
+    dbapi_connection.execute("PRAGMA foreign_keys=ON")
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+ORDER_STATUSES = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"]
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///bookhub.db"
@@ -171,6 +180,241 @@ def books():
 def book_details(book_id):
     book = Book.query.get_or_404(book_id)
     return render_template("book_details.html", book=book)
+
+
+@app.template_global()
+def cart_item_count():
+    cart = session.get("cart", {})
+    return sum(cart.values())
+
+
+@app.route("/cart/add/<int:book_id>", methods=["POST"])
+def add_to_cart(book_id):
+    Book.query.get_or_404(book_id)
+    quantity = request.form.get("quantity", 1, type=int)
+    if not quantity or quantity < 1:
+        quantity = 1
+
+    cart = session.get("cart", {})
+    key = str(book_id)
+    cart[key] = cart.get(key, 0) + quantity
+    session["cart"] = cart
+
+    next_url = _safe_next_path(request.form.get("next"))
+    return redirect(next_url or url_for("books"))
+
+
+def _get_cart_items():
+    cart_data = session.get("cart", {})
+    book_ids = [int(book_id) for book_id in cart_data]
+    books_by_id = {book.id: book for book in Book.query.filter(Book.id.in_(book_ids)).all()}
+
+    cart_items = []
+    cart_total = 0.0
+    for book_id_str, quantity in cart_data.items():
+        book = books_by_id.get(int(book_id_str))
+        if not book:
+            continue
+        subtotal = book.price * quantity
+        cart_total += subtotal
+        cart_items.append({"book": book, "quantity": quantity, "subtotal": subtotal})
+
+    return cart_items, cart_total
+
+
+@app.route("/cart")
+def cart():
+    cart_items, cart_total = _get_cart_items()
+    return render_template("cart.html", cart_items=cart_items, cart_total=cart_total)
+
+
+@app.route("/cart/update/<int:book_id>", methods=["POST"])
+def update_cart_item(book_id):
+    quantity = request.form.get("quantity", 1, type=int)
+    cart = session.get("cart", {})
+    key = str(book_id)
+    if key in cart:
+        if quantity and quantity > 0:
+            cart[key] = quantity
+        else:
+            cart.pop(key)
+        session["cart"] = cart
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart/remove/<int:book_id>", methods=["POST"])
+def remove_from_cart(book_id):
+    cart = session.get("cart", {})
+    cart.pop(str(book_id), None)
+    session["cart"] = cart
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart/clear", methods=["POST"])
+def clear_cart():
+    session["cart"] = {}
+    return redirect(url_for("cart"))
+
+
+@app.route("/checkout", methods=["GET", "POST"])
+def checkout():
+    cart_items, cart_total = _get_cart_items()
+
+    if not cart_items:
+        return redirect(url_for("cart"))
+
+    errors = None
+    form = {}
+    submitted = request.args.get("submitted") == "1"
+
+    if request.method == "POST":
+        form = request.form
+        full_name = request.form.get("full_name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+        address_line1 = request.form.get("address_line1", "").strip()
+        address_line2 = request.form.get("address_line2", "").strip()
+        city = request.form.get("city", "").strip()
+        state = request.form.get("state", "").strip()
+        postal_code = request.form.get("postal_code", "").strip()
+        country = request.form.get("country", "").strip()
+
+        errors = []
+        if not full_name:
+            errors.append("Full name is required.")
+        if not email:
+            errors.append("Email address is required.")
+        elif not EMAIL_PATTERN.match(email):
+            errors.append("Please enter a valid email address.")
+        if not phone:
+            errors.append("Phone number is required.")
+        if not address_line1:
+            errors.append("Address is required.")
+        if not city:
+            errors.append("City is required.")
+        if not state:
+            errors.append("State/Province is required.")
+        if not postal_code:
+            errors.append("Postal/ZIP code is required.")
+        if not country:
+            errors.append("Country is required.")
+
+        if errors:
+            return render_template(
+                "checkout.html",
+                cart_items=cart_items,
+                cart_total=cart_total,
+                errors=errors,
+                form=form,
+                submitted=False,
+            )
+
+        session["checkout_info"] = {
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "address_line1": address_line1,
+            "address_line2": address_line2,
+            "city": city,
+            "state": state,
+            "postal_code": postal_code,
+            "country": country,
+        }
+        return redirect(url_for("checkout", submitted=1))
+
+    if submitted:
+        form = session.get("checkout_info", {})
+
+    return render_template(
+        "checkout.html",
+        cart_items=cart_items,
+        cart_total=cart_total,
+        errors=errors,
+        form=form,
+        submitted=submitted,
+    )
+
+
+def _generate_order_number():
+    while True:
+        candidate = f"ORD-{datetime.utcnow():%Y%m%d}-{uuid.uuid4().hex[:6].upper()}"
+        if not Order.query.filter_by(order_number=candidate).first():
+            return candidate
+
+
+@app.route("/place-order", methods=["POST"])
+def place_order():
+    cart_items, cart_total = _get_cart_items()
+    checkout_info = session.get("checkout_info")
+
+    if not cart_items:
+        return redirect(url_for("cart"))
+    if not checkout_info:
+        return redirect(url_for("checkout"))
+
+    order = Order(
+        order_number=_generate_order_number(),
+        full_name=checkout_info["full_name"],
+        email=checkout_info["email"],
+        phone=checkout_info["phone"],
+        address_line1=checkout_info["address_line1"],
+        address_line2=checkout_info.get("address_line2", ""),
+        city=checkout_info["city"],
+        state=checkout_info["state"],
+        postal_code=checkout_info["postal_code"],
+        country=checkout_info["country"],
+        total=cart_total,
+        status="Pending",
+    )
+
+    for item in cart_items:
+        order.items.append(OrderItem(
+            book_id=item["book"].id,
+            book_title=item["book"].title,
+            unit_price=item["book"].price,
+            quantity=item["quantity"],
+            subtotal=item["subtotal"],
+        ))
+
+    db.session.add(order)
+    db.session.commit()
+
+    session["cart"] = {}
+    session.pop("checkout_info", None)
+
+    order_history = session.get("order_history", [])
+    if order.order_number not in order_history:
+        order_history.append(order.order_number)
+    session["order_history"] = order_history
+
+    return redirect(url_for("order_confirmation", order_number=order.order_number))
+
+
+@app.route("/order/confirmation/<order_number>")
+def order_confirmation(order_number):
+    order = Order.query.filter_by(order_number=order_number).first_or_404()
+    return render_template("order_confirmation.html", order=order)
+
+
+@app.route("/orders")
+def order_history():
+    order_numbers = session.get("order_history", [])
+    orders = []
+    if order_numbers:
+        orders = (
+            Order.query.filter(Order.order_number.in_(order_numbers))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
+    return render_template("order_history.html", orders=orders)
+
+
+@app.route("/orders/<order_number>")
+def order_details(order_number):
+    if order_number not in session.get("order_history", []):
+        abort(404)
+    order = Order.query.filter_by(order_number=order_number).first_or_404()
+    return render_template("order_details.html", order=order)
 
 
 @app.route("/contact", methods=["GET", "POST"])
@@ -418,6 +662,57 @@ def delete_message(message_id):
         return redirect(url_for("admin_messages"))
 
     return render_template("delete_message.html", message=message)
+
+
+@app.route("/admin/orders")
+@login_required
+def admin_orders():
+    search = request.args.get("q", "").strip()
+    status_filter = request.args.get("status", "").strip()
+
+    query = Order.query
+
+    if search:
+        like_pattern = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                Order.order_number.ilike(like_pattern),
+                Order.full_name.ilike(like_pattern),
+                Order.email.ilike(like_pattern),
+            )
+        )
+
+    if status_filter:
+        query = query.filter(Order.status == status_filter)
+
+    orders = query.order_by(Order.created_at.desc()).all()
+
+    return render_template(
+        "admin_orders.html",
+        orders=orders,
+        statuses=ORDER_STATUSES,
+        search=search,
+        selected_status=status_filter,
+    )
+
+
+@app.route("/admin/orders/<int:order_id>")
+@login_required
+def admin_order_details(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template("admin_order_details.html", order=order, statuses=ORDER_STATUSES)
+
+
+@app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
+@login_required
+def update_order_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status = request.form.get("status", "").strip()
+    if new_status in ORDER_STATUSES:
+        order.status = new_status
+        db.session.commit()
+    next_url = _safe_next_path(request.form.get("next"))
+    return redirect(next_url or url_for("admin_orders"))
 
 
 if __name__ == "__main__":
