@@ -3,49 +3,80 @@
 {% block title %}BookHub - Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 600px;">
-    <h1 class="mb-4">Edit Profile</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-9 col-lg-7">
+            <h1 class="mb-4"><i class="bi bi-pencil-square me-2"></i>Edit Profile</h1>
 
-    {% if errors %}
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            {% for error in errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+            {% if errors %}
+            <div class="alert alert-danger">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Please fix the following:</strong>
+                </div>
+                <ul class="mb-0 ps-4">
+                    {% for error in errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="card profile-card">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('customer_edit_profile') }}" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form.get('first_name', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form.get('last_name', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ form.get('username', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="phone" class="form-label">Phone Number (optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{{ form.get('phone', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes
+                            </button>
+                            <a href="{{ url_for('customer_account') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
-
-    <form method="POST" action="{{ url_for('customer_edit_profile') }}" class="row g-3">
-        <div class="col-md-6">
-            <label for="first_name" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form.get('first_name', '') }}">
-        </div>
-
-        <div class="col-md-6">
-            <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form.get('last_name', '') }}">
-        </div>
-
-        <div class="col-md-6">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" value="{{ form.get('username', '') }}">
-        </div>
-
-        <div class="col-md-6">
-            <label for="email" class="form-label">Email Address</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}">
-        </div>
-
-        <div class="col-12">
-            <label for="phone" class="form-label">Phone Number (optional)</label>
-            <input type="text" class="form-control" id="phone" name="phone" value="{{ form.get('phone', '') }}">
-        </div>
-
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="{{ url_for('customer_account') }}" class="btn btn-outline-secondary">Cancel</a>
-        </div>
-    </form>
 </div>
 {% endblock %}

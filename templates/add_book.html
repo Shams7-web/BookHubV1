@@ -4,11 +4,15 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">Add New Book</h1>
+    <h1 class="mb-4"><i class="bi bi-plus-circle me-2"></i>Add New Book</h1>
 
     {% if errors %}
     <div class="alert alert-danger">
-        <ul class="mb-0">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Please fix the following:</strong>
+        </div>
+        <ul class="mb-0 ps-4">
             {% for error in errors %}
             <li>{{ error }}</li>
             {% endfor %}
@@ -16,51 +20,80 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('add_book') }}" enctype="multipart/form-data" class="row g-3">
-        <div class="col-md-6">
-            <label for="title" class="form-label">Title</label>
-            <input type="text" class="form-control" id="title" name="title" value="{{ form.get('title', '') }}">
-        </div>
+    <div class="card profile-card">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('add_book') }}" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
+                    <label for="title" class="form-label">Title</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-book"></i></span>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ form.get('title', '') }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="author" class="form-label">Author</label>
-            <input type="text" class="form-control" id="author" name="author" value="{{ form.get('author', '') }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="author" class="form-label">Author</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="author" name="author" value="{{ form.get('author', '') }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" class="form-control" id="category" name="category" value="{{ form.get('category', '') }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="category" class="form-label">Category</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                        <input type="text" class="form-control" id="category" name="category" value="{{ form.get('category', '') }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="price" class="form-label">Price</label>
-            <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', '') }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="price" class="form-label">Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                        <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', '') }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="stock" class="form-label">Stock Quantity</label>
-            <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', '0') }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="stock" class="form-label">Stock Quantity</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                        <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', '0') }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
-            <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', '5') }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
+                        <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', '5') }}">
+                    </div>
+                </div>
 
-        <div class="col-12">
-            <label for="cover_image" class="form-label">Cover Image (JPG, JPEG, or PNG)</label>
-            <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-        </div>
+                <div class="col-12">
+                    <label for="cover_image" class="form-label">Cover Image (JPG, JPEG, or PNG)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-image"></i></span>
+                        <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                    </div>
+                </div>
 
-        <div class="col-12">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="4">{{ form.get('description', '') }}</textarea>
-        </div>
+                <div class="col-12">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4">{{ form.get('description', '') }}</textarea>
+                </div>
 
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save Book</button>
-            <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">Cancel</a>
+                <div class="col-12 d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Book
+                    </button>
+                    <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

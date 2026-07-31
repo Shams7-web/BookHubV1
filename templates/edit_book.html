@@ -4,11 +4,15 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">Edit Book</h1>
+    <h1 class="mb-4"><i class="bi bi-pencil-square me-2"></i>Edit Book</h1>
 
     {% if errors %}
     <div class="alert alert-danger">
-        <ul class="mb-0">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Please fix the following:</strong>
+        </div>
+        <ul class="mb-0 ps-4">
             {% for error in errors %}
             <li>{{ error }}</li>
             {% endfor %}
@@ -16,57 +20,86 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('edit_book', book_id=book.id) }}" enctype="multipart/form-data" class="row g-3">
-        <div class="col-md-6">
-            <label for="title" class="form-label">Title</label>
-            <input type="text" class="form-control" id="title" name="title" value="{{ form.get('title', book.title) if form else book.title }}">
-        </div>
+    <div class="card profile-card">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('edit_book', book_id=book.id) }}" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
+                    <label for="title" class="form-label">Title</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-book"></i></span>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ form.get('title', book.title) if form else book.title }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="author" class="form-label">Author</label>
-            <input type="text" class="form-control" id="author" name="author" value="{{ form.get('author', book.author) if form else book.author }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="author" class="form-label">Author</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="author" name="author" value="{{ form.get('author', book.author) if form else book.author }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" class="form-control" id="category" name="category" value="{{ form.get('category', book.category) if form else book.category }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="category" class="form-label">Category</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                        <input type="text" class="form-control" id="category" name="category" value="{{ form.get('category', book.category) if form else book.category }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="price" class="form-label">Price</label>
-            <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', book.price) if form else book.price }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="price" class="form-label">Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                        <input type="text" class="form-control" id="price" name="price" value="{{ form.get('price', book.price) if form else book.price }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="stock" class="form-label">Stock Quantity</label>
-            <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', book.stock) if form else book.stock }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="stock" class="form-label">Stock Quantity</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                        <input type="number" min="0" step="1" class="form-control" id="stock" name="stock" value="{{ form.get('stock', book.stock) if form else book.stock }}">
+                    </div>
+                </div>
 
-        <div class="col-md-6">
-            <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
-            <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', book.low_stock_threshold) if form else book.low_stock_threshold }}">
-        </div>
+                <div class="col-md-6">
+                    <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
+                        <input type="number" min="0" step="1" class="form-control" id="low_stock_threshold" name="low_stock_threshold" value="{{ form.get('low_stock_threshold', book.low_stock_threshold) if form else book.low_stock_threshold }}">
+                    </div>
+                </div>
 
-        <div class="col-12">
-            <label class="form-label d-block">Current Cover</label>
-            <img src="{{ cover_image_url(book.image_url) }}" alt="{{ book.title }}" class="rounded mb-2" style="max-height: 150px;">
-        </div>
+                <div class="col-12">
+                    <label class="form-label d-block">Current Cover</label>
+                    <img src="{{ cover_image_url(book.image_url) }}" alt="{{ book.title }}" class="rounded mb-2 edit-book-cover">
+                </div>
 
-        <div class="col-12">
-            <label for="cover_image" class="form-label">Replace Cover Image (JPG, JPEG, or PNG)</label>
-            <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-            <div class="form-text">Leave blank to keep the current cover image.</div>
-        </div>
+                <div class="col-12">
+                    <label for="cover_image" class="form-label">Replace Cover Image (JPG, JPEG, or PNG)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-image"></i></span>
+                        <input type="file" class="form-control" id="cover_image" name="cover_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                    </div>
+                    <div class="form-text">Leave blank to keep the current cover image.</div>
+                </div>
 
-        <div class="col-12">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="4">{{ form.get('description', book.description) if form else book.description }}</textarea>
-        </div>
+                <div class="col-12">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4">{{ form.get('description', book.description) if form else book.description }}</textarea>
+                </div>
 
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">Cancel</a>
+                <div class="col-12 d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                    <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

@@ -40,6 +40,58 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('books') }}"><i class="bi bi-journal-bookmark me-1"></i>Books</a>
                     </li>
+
+                    {% if session.get('admin_id') %}
+                    <!-- Admin navigation -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools me-1"></i>Admin: {{ current_admin_username() }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('admin') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}"><i class="bi bi-receipt me-2"></i>Orders</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_messages') }}"><i class="bi bi-envelope me-2"></i>Messages</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+
+                    {% elif session.get('customer_id') %}
+                    <!-- Customer navigation -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}"><i class="bi bi-envelope me-1"></i>Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('wishlist') }}">
+                            <i class="bi bi-heart me-1"></i>Wishlist
+                            {% if wishlist_item_count() %}
+                            <span class="badge rounded-pill bg-danger">{{ wishlist_item_count() }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('cart') }}">
+                            <i class="bi bi-cart3 me-1"></i>Cart
+                            {% if cart_item_count() %}
+                            <span class="badge rounded-pill bg-danger">{{ cart_item_count() }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle me-1"></i>Welcome, {{ current_customer_name() }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('customer_account') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('order_history') }}"><i class="bi bi-receipt me-2"></i>Order History</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('customer_change_password') }}"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('customer_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+
+                    {% else %}
+                    <!-- Visitor navigation -->
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('contact') }}"><i class="bi bi-envelope me-1"></i>Contact</a>
                     </li>
@@ -51,40 +103,12 @@
                             {% endif %}
                         </a>
                     </li>
-                    {% if session.get('customer_id') %}
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="{{ url_for('wishlist') }}">
-                            <i class="bi bi-heart me-1"></i>Wishlist
-                            {% if wishlist_item_count() %}
-                            <span class="badge rounded-pill bg-danger">{{ wishlist_item_count() }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('order_history') }}"><i class="bi bi-receipt me-1"></i>My Orders</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('customer_account') }}"><i class="bi bi-person-circle me-1"></i>My Account</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('customer_logout') }}"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('customer_register') }}"><i class="bi bi-person-plus me-1"></i>Register</a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('customer_login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
                     </li>
-                    {% endif %}
-                    {% if session.get('admin_id') %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin') }}"><i class="bi bi-speedometer2 me-1"></i>Admin Dashboard</a>
+                        <a class="nav-link" href="{{ url_for('customer_register') }}"><i class="bi bi-person-plus me-1"></i>Register</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_logout') }}"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
-                    </li>
-                    {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin_login') }}"><i class="bi bi-shield-lock me-1"></i>Admin Login</a>
                     </li>

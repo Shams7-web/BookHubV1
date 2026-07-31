@@ -4,15 +4,27 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">Delete Book</h1>
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-8 col-lg-6">
+            <h1 class="mb-4"><i class="bi bi-trash3 me-2"></i>Delete Book</h1>
 
-    <div class="alert alert-warning">
-        Are you sure you want to delete <strong>"{{ book.title }}"</strong> by {{ book.author }}? This action cannot be undone.
+            <div class="alert alert-warning d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-triangle fs-4"></i>
+                <div>
+                    Are you sure you want to delete <strong>"{{ book.title }}"</strong> by {{ book.author }}?
+                    This action cannot be undone.
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" class="d-flex gap-2">
+                <button type="submit" name="confirm" value="yes" class="btn btn-danger">
+                    <i class="bi bi-trash3 me-1"></i>Yes, Delete
+                </button>
+                <button type="submit" name="confirm" value="no" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </button>
+            </form>
+        </div>
     </div>
-
-    <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
-        <button type="submit" name="confirm" value="yes" class="btn btn-danger">Yes, Delete</button>
-        <button type="submit" name="confirm" value="no" class="btn btn-outline-secondary">Cancel</button>
-    </form>
 </div>
 {% endblock %}

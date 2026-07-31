@@ -92,6 +92,22 @@ def cover_image_url(image_url):
     return url_for("static", filename=f"uploads/{image_url}")
 
 
+@app.template_global()
+def current_customer_name():
+    if not session.get("customer_id"):
+        return None
+    customer = Customer.query.get(session["customer_id"])
+    return customer.first_name if customer else None
+
+
+@app.template_global()
+def current_admin_username():
+    if not session.get("admin_id"):
+        return None
+    admin = Admin.query.get(session["admin_id"])
+    return admin.username if admin else None
+
+
 def seed_admin():
     if Admin.query.count() > 0:
         return
@@ -305,7 +321,7 @@ def delete_review(book_id):
 @app.route("/register", methods=["GET", "POST"])
 def customer_register():
     if session.get("customer_id"):
-        return redirect(url_for("customer_account"))
+        return redirect(url_for("books"))
 
     errors = None
     form = {}
@@ -367,7 +383,7 @@ def customer_register():
 @app.route("/login", methods=["GET", "POST"])
 def customer_login():
     if session.get("customer_id"):
-        return redirect(url_for("customer_account"))
+        return redirect(url_for("books"))
 
     error = None
     registered = request.args.get("registered") == "1"
@@ -910,6 +926,15 @@ def admin():
     low_stock_count = Book.query.filter(Book.stock > 0, Book.stock <= Book.low_stock_threshold).count()
     out_of_stock_count = Book.query.filter(Book.stock <= 0).count()
 
+    dashboard_stats = {
+        "total_books": Book.query.count(),
+        "total_customers": Customer.query.count(),
+        "total_orders": Order.query.count(),
+        "total_messages": ContactMessage.query.count(),
+        "total_reviews": Review.query.count(),
+        "low_stock_count": low_stock_count,
+    }
+
     return render_template(
         "admin.html",
         books=all_books,
@@ -917,6 +942,7 @@ def admin():
         stock_filter=stock_filter,
         low_stock_count=low_stock_count,
         out_of_stock_count=out_of_stock_count,
+        dashboard_stats=dashboard_stats,
     )
 
 

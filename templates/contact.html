@@ -3,48 +3,77 @@
 {% block title %}BookHub - Contact Us{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 700px;">
-    <h1 class="mb-4 text-center">Contact Us</h1>
-    <p class="text-muted text-center mb-4">Have a question or feedback? Send us a message and we'll get back to you.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-9 col-lg-7">
+            <div class="text-center mb-4">
+                <i class="bi bi-envelope-heart auth-icon"></i>
+                <h1 class="mt-3 mb-1 border-0">Contact Us</h1>
+                <p class="text-muted mb-0">Have a question or feedback? Send us a message and we'll get back to you.</p>
+            </div>
 
-    {% if success %}
-    <div class="alert alert-success">Thank you! Your message has been sent successfully.</div>
-    {% endif %}
+            {% if success %}
+            <div class="alert alert-success d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle"></i>
+                <span>Thank you! Your message has been sent successfully.</span>
+            </div>
+            {% endif %}
 
-    {% if errors %}
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            {% for error in errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+            {% if errors %}
+            <div class="alert alert-danger">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Please fix the following:</strong>
+                </div>
+                <ul class="mb-0 ps-4">
+                    {% for error in errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="card auth-card">
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('contact') }}" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="full_name" class="form-label">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Your full name" value="{{ form.get('full_name', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" value="{{ form.get('email', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="subject" class="form-label">Subject</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+                                <input type="text" class="form-control" id="subject" name="subject" placeholder="What is this about?" value="{{ form.get('subject', '') }}">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" placeholder="Write your message here...">{{ form.get('message', '') }}</textarea>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
-
-    <form method="POST" action="{{ url_for('contact') }}" class="row g-3">
-        <div class="col-md-6">
-            <label for="full_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ form.get('full_name', '') }}">
-        </div>
-
-        <div class="col-md-6">
-            <label for="email" class="form-label">Email Address</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}">
-        </div>
-
-        <div class="col-12">
-            <label for="subject" class="form-label">Subject</label>
-            <input type="text" class="form-control" id="subject" name="subject" value="{{ form.get('subject', '') }}">
-        </div>
-
-        <div class="col-12">
-            <label for="message" class="form-label">Message</label>
-            <textarea class="form-control" id="message" name="message" rows="5">{{ form.get('message', '') }}</textarea>
-        </div>
-
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Send Message</button>
-        </div>
-    </form>
 </div>
 {% endblock %}

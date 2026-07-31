@@ -67,6 +67,17 @@ main h1 {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+.site-navbar .dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .18);
+}
+
+.site-navbar .dropdown-item:hover,
+.site-navbar .dropdown-item:focus {
+    background-color: var(--bh-cream);
+    color: var(--bh-primary);
+}
+
 /* ---------- Buttons ---------- */
 
 .btn {
@@ -125,6 +136,18 @@ main h1 {
 .table-responsive {
     border-radius: .6rem;
     overflow: hidden;
+}
+
+/* Shared subtle border treatment for content cards across the app */
+.auth-card,
+.profile-card,
+.cart-card,
+.checkout-section-card,
+.order-summary-card,
+.order-card,
+.admin-stat-card,
+.purchase-panel {
+    border: 1px solid rgba(31, 39, 51, .08);
 }
 
 /* ---------- Book cards (Books page & Featured) ---------- */
@@ -347,7 +370,6 @@ main h1 {
 }
 
 .purchase-panel {
-    border: 1px solid rgba(31, 39, 51, .08);
     background-color: #fff;
 }
 
@@ -357,12 +379,6 @@ main h1 {
     width: 56px;
     height: 74px;
     object-fit: cover;
-}
-
-.cart-card,
-.checkout-section-card,
-.order-summary-card {
-    border: 1px solid rgba(31, 39, 51, .08);
 }
 
 .order-summary-card {
@@ -384,7 +400,6 @@ main h1 {
 }
 
 .order-card {
-    border: 1px solid rgba(31, 39, 51, .08);
     transition: transform .15s ease, box-shadow .15s ease;
 }
 
@@ -404,4 +419,78 @@ main h1 {
     .book-detail-cover {
         max-height: 360px;
     }
+}
+
+/* ---------- Auth pages (Login / Register) ---------- */
+
+.auth-icon {
+    font-size: 2.75rem;
+    color: var(--bh-primary);
+}
+
+/* ---------- Profile pages ---------- */
+
+.avatar-circle {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background-color: var(--bh-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--bh-heading-font);
+    font-size: 1.75rem;
+    font-weight: 900;
+}
+
+.profile-list .list-group-item {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+
+/* ---------- Accessibility ---------- */
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.page-link:focus-visible {
+    outline: 2px solid var(--bh-gold);
+    outline-offset: 2px;
+}
+
+/* ---------- Admin dashboard ---------- */
+
+.admin-stat-card i {
+    font-size: 1.6rem;
+    color: var(--bh-primary);
+}
+
+.admin-stat-card-warning i {
+    color: #b8860b;
+}
+
+.admin-stat-number {
+    font-family: var(--bh-heading-font);
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--bh-navy);
+    margin-top: .25rem;
+}
+
+.admin-stat-label {
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: .75rem;
+}
+
+.admin-thumb {
+    width: 64px;
+    height: 85px;
+    object-fit: cover;
+}
+
+.edit-book-cover {
+    max-height: 180px;
 }
