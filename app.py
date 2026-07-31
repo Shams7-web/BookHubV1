@@ -175,7 +175,18 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    featured_books = Book.query.order_by(Book.id.desc()).limit(4).all()
+    categories = [
+        row[0] for row in db.session.query(Book.category).distinct().order_by(Book.category).all()
+    ]
+    stats = {
+        "total_books": Book.query.count(),
+        "total_categories": len(categories),
+        "total_customers": Customer.query.count(),
+    }
+    return render_template(
+        "index.html", featured_books=featured_books, categories=categories, stats=stats
+    )
 
 
 BOOKS_PER_PAGE = 12
@@ -236,6 +247,13 @@ def book_details(book_id):
     reviews = Review.query.filter_by(book_id=book_id).order_by(Review.created_at.desc()).all()
     average_rating = round(sum(r.rating for r in reviews) / len(reviews), 1) if reviews else None
 
+    related_books = (
+        Book.query.filter(Book.category == book.category, Book.id != book.id)
+        .order_by(Book.id.desc())
+        .limit(4)
+        .all()
+    )
+
     return render_template(
         "book_details.html",
         book=book,
@@ -243,6 +261,7 @@ def book_details(book_id):
         reviews=reviews,
         average_rating=average_rating,
         my_review=my_review,
+        related_books=related_books,
     )
 
 
